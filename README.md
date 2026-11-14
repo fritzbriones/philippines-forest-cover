@@ -18,7 +18,7 @@ A publication-ready R choropleth of **forest-cover percentage by region**, built
 ```text
 ph_forest_cover.R            # Full pipeline: validate -> join -> map -> export
 ph_forest_cover_2020.csv     # Verified data: region, forest classes, land area, forest %
-ph_regions.gpkg              # Region boundaries (add from PSA/NAMRIA/PhilGIS/GADM)
+ph_regions.geojson           # Boundaries: geoBoundaries (gbOpen, CC BY 4.0), 2020 vintage     # Region boundaries (add from PSA/NAMRIA/PhilGIS/GADM)
 NOTES.md                     # Verification report + denominator definitions + methods wording
 README.md
 ```
@@ -33,7 +33,7 @@ install.packages(c("tidyverse", "sf", "scales"))
 
 ### 2. Steps
 
-1. Place a region-level boundary file in the folder as `ph_regions.gpkg` (official PSA/NAMRIA, PhilGIS, or GADM level-1 all work).
+1.Run `00_prepare_boundaries.R` once - it builds `ph_regions.gpkg` from `ph_regions.geojson` (all 17 regions, guardrail included). Do not use GADM level-1: for the Philippines it contains the 81 provinces, not the 17 regions.
 2. Open `ph_forest_cover.R`.
 3. Check the join column name in BATCH 2 (`by = c("name" = "region")`) and the crosswalk table — adjust to your boundary file's naming.
 4. Run the script top to bottom. The map is saved to `output/ph_forest_cover_2020.png` (and SVG).
@@ -48,3 +48,4 @@ Philippine Statistics Authority (public sector information).
 ## Honest denominators
 
 Regional percentages use official regional land areas. The national PSA land-cover total (29,588,367 ha) and the sum of official regional land areas (~34.8M ha) differ because of administrative-boundary and cadastral conventions. The national percentage is therefore presented as a PSA reference value, not a weighted average of regional percentages. Full treatment in [NOTES.md](NOTES.md).
+Region boundaries: geoBoundaries (gbOpen, CC BY 4.0), 2020 vintage, used with attribution.
