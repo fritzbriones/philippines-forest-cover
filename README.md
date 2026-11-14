@@ -2,7 +2,7 @@ Forest Cover by Region, Philippines (2020)
 
 A publication-ready R choropleth of forest-cover percentage by region, built from the PSA Land Asset Accounts 2015–2020 (2020 closing stock) and official regional land areas.
 
-Forest Cover by Region, Philippines
+!
 ⸻
 Data Profile & Scope
 – Forest measure: closed + open + mangrove forest, 2020 closing stock (hectares), verified cell-by-cell against the PSA statistical tables.
