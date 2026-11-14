@@ -18,7 +18,7 @@ A publication-ready R choropleth of **forest-cover percentage by region**, built
 ```text
 ph_forest_cover.R            # Full pipeline: validate -> join -> map -> export
 ph_forest_cover_2020.csv     # Verified data: region, forest classes, land area, forest %
-ph_regions.geojson           # Boundaries: geoBoundaries (gbOpen, CC BY 4.0), 2020 vintage     # Region boundaries (add from PSA/NAMRIA/PhilGIS/GADM)
+ph_regions.geojson           # Boundaries: geoBoundaries (gbOpen, CC BY 4.0), 2020 vintage     
 NOTES.md                     # Verification report + denominator definitions + methods wording
 README.md
 ```
@@ -33,7 +33,7 @@ install.packages(c("tidyverse", "sf", "scales"))
 
 ### 2. Steps
 
-1.Run `00_prepare_boundaries.R` once - it builds `ph_regions.gpkg` from `ph_regions.geojson` (all 17 regions, guardrail included). Do not use GADM level-1: for the Philippines it contains the 81 provinces, not the 17 regions.
+1. Run `00_prepare_boundaries.R` once - it builds `ph_regions.gpkg` from `ph_regions.geojson` (all 17 regions, guardrail included). Do not use GADM level-1: for the Philippines it contains the 81 provinces, not the 17 regions.
 2. Open `ph_forest_cover.R`.
 3. Check the join column name in BATCH 2 (`by = c("name" = "region")`) and the crosswalk table — adjust to your boundary file's naming.
 4. Run the script top to bottom. The map is saved to `output/ph_forest_cover_2020.png` (and SVG).
