@@ -1,57 +1,80 @@
-# Technical Notes — Data Verification and Denominator Definitions
+# Technical Notes — Philippine Forest Cover by Region (2020)
 
-## What this dataset is
-`ph_forest_cover_2020.csv` contains the **2020 closing stock** of the PSA
-Land Asset Accounts 2015–2020 (closed forest, open forest, mangrove forest)
-for all 17 regions, verified cell-by-cell against the official statistical
-tables (`Statistical Table_Land Accounts_Final.xlsx`):
+## Project contents
 
-- All 17 regional closing-stock values match the source workbook to the
-  hectare after rounding (51 of 51 forest-class cells).
-- The regional closing stocks sum **exactly** to the National table for all
-  13 land-cover classes, confirming the accounts are internally consistent.
-- National forest cover (closed + open + mangrove) = **7,225,907 ha**.
+- `ph_forest_cover_2020.csv`: regional forest-cover observations and official regional land-area denominators.
+- `ph_regions.geojson`: geoBoundaries Philippines ADM1 boundaries, 2020 vintage.
+- `00_prepare_boundaries.R`: validates the 17 boundary features and creates `ph_regions.gpkg`.
+- `ph_forest_cover.R`: joins the regional data to the prepared boundaries and exports the PNG and SVG map.
+- `DATA_RECONCILIATION.md`: transparent record of small aggregate discrepancies.
 
-## Two denominator systems (the key methodological point)
+## Boundary data
 
-| System | Denominator | Forest definition | Result |
-|---|---|---|---|
-| National convention | 30,000,000 ha (official PH land area) | incl. mangrove | **24.09%** |
-| PSA published figure | 29,588,367 ha (sum of classified land-cover areas, 2020) | open + closed only | **23.4%** (reproduced: 23.37%) |
-| Regional (this map) | Official regional land areas (sum ≈ 34.77M ha) | incl. mangrove | see CSV |
+The supplied GeoJSON contains 17 unique ADM1 features, all with geometries, in EPSG:4326. Its `shapeName` values match the crosswalk in `00_prepare_boundaries.R`; the 2020 boundary uses `ARMM`, which the script maps to the CSV key `BARMM`.
 
-The sum of official regional land areas (~34.77M ha) exceeds both national
-totals because regional cadastral/administrative areas overlap and differ
-from land-classification coverage. This is a documented feature of
-Philippine land statistics, not an error in the data.
+Boundary metadata for geoBoundaries PHL ADM1 identifies:
+- Boundary vintage: 2020
+- Administrative level: ADM1 (Regions)
+- Source agencies: National Mapping and Resource Information Authority (NAMRIA), Philippine Statistics Authority (PSA), and OCHA Philippines
+- Boundary licence: Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)
 
-Consequences, stated honestly:
+The boundary-data licence is separate from the MIT licence covering this project's original code. Retain the boundary attribution when redistributing the GeoJSON or maps derived from it.
 
-1. Regional percentages are **not** population- or land-weighted components
-   of the national percentage.
-2. The national figure is presented on the map as a **PSA reference
-   value**, never computed from the regional rows.
-3. Regions with land-cover mapping gaps (notably BARMM, whose classified
-   area is ~1.24M ha against an official regional area of ~3.67M ha) would
-   be badly understated if the classified-area denominator were used
-   instead (BARMM would jump from 8.11% to ~24%). The official regional
-   land area is therefore the correct regional denominator.
+## Denominator definitions
 
-## Methods wording (for a paper or report)
+| Measure | Denominator / definition | Reference |
+|---|---|---|
+| National convention | 30,000,000 ha; forest cover includes mangrove | 24.09% |
+| PSA published reference | 29,588,367 ha classified land-cover total; open + closed forest | 23.4% (reported; approximately 23.37% using the underlying ratio) |
+| Regional map | Official regional land-area denominators; forest cover includes mangrove | Calculated separately for each region |
 
-> Regional forest-cover shares are calculated using official regional land
-> areas as denominators. The PSA Land Asset Accounts report a national
-> land-cover total of 29,588,367 ha for 2020, whereas the sum of official
-> regional land areas is larger because of administrative-boundary and
-> land-accounting conventions. Consequently, the national forest-cover
-> share is presented as a national PSA reference value and is not computed
-> as a weighted average of the regional shares. Forest cover here includes
-> mangrove forest; PSA's published 23.4% figure refers to open and closed
-> forest on the classified land-cover total.
+The sum of official regional land areas in the CSV is 34,768,149 ha. This is not the national classified land-cover denominator. Therefore, the national reference percentages are annotations and are not calculated as weighted averages of the regional percentages.
+
+## Data reconciliation and rounding
+
+The CSV's `forest_cover_ha` column is retained as the supplied regional aggregate and is used to calculate the mapped percentage. The three forest-class columns are also retained as supplied. They do not sum exactly to the aggregate in five rows:
+
+| Region | Closed + open + mangrove (ha) | Reported forest aggregate (ha) | Difference (class sum minus aggregate) |
+|---|---:|---:|---:|
+| REGION IV-A | 272,634 | 272,635 | -1 |
+| REGION V | 208,458 | 208,459 | -1 |
+| REGION VIII | 538,952 | 538,953 | -1 |
+| REGION IX | 173,126 | 173,127 | -1 |
+| REGION XII | 293,690 | 293,689 | +1 |
+
+Consequently:
+- Sum of the regional `forest_cover_ha` aggregates: **7,225,908 ha**.
+- Sum of the three class columns across regions: **7,225,905 ha**.
+- National total stated in the supplied notes: **7,225,907 ha**.
+
+These figures differ by only 1–3 ha, but they are not mathematically identical. The supplied CSV alone does not establish whether this reflects independent rounding in the source tables or a transcription issue. The project therefore does **not** silently alter the source values or claim exact equality. The map uses the supplied `forest_cover_ha` aggregate consistently, while the R script reports the class-sum differences as a diagnostic. Before journal publication, reconcile these five rows and the national total against the original PSA workbook and preserve a copy of that source table in the research archive.
+
+The `forest_pct` column in the CSV is rounded to two decimal places. The R script recalculates the mapped percentage from `forest_cover_ha / total_land_ha_official` so that the map uses unrounded ratios.
+
+## Methods wording
+
+> Regional forest-cover percentages were calculated by dividing the reported regional forest-cover aggregate (closed forest, open forest, and mangrove forest) by the corresponding official regional land area. National PSA reference percentages are reported separately because the national classified land-cover denominator and the sum of official regional land areas represent different accounting conventions. Small hectare-level differences between the reported regional aggregate and the sum of the three displayed forest classes are retained transparently pending reconciliation against the original PSA statistical workbook.
+
+## Reproducibility
+
+Run from the project root in RStudio:
+
+```r
+install.packages(c("tidyverse", "sf", "scales", "svglite"))
+source("00_prepare_boundaries.R")
+source("ph_forest_cover.R")
+```
+
+Expected outputs:
+- `ph_regions.gpkg`
+- `output/ph_forest_cover_2020.png`
+- `output/ph_forest_cover_2020.svg`
+
+The R scripts include checks for the 17 region keys, duplicate/missing regions, geometry validity, and complete polygon-to-data joins.
 
 ## Sources
-- PSA Land Asset Accounts 2015–2020, technical notes and statistical
-  tables (psa.gov.ph)
-- PSA ENRAD Table 1.22, Forest Cover of the Philippines by Forest Type,
-  by Region and Province: 2010, 2015, 2020
-- Regional land areas: official PSA/DENR administrative figures
+
+- Philippine Statistics Authority (PSA), Land Asset Accounts 2015–2020, statistical tables and technical notes (source workbook should be retained with the research materials).
+- PSA, ENRAD Table 1.22, Forest Cover of the Philippines by Forest Type, by Region and Province: 2010, 2015, 2020.
+- geoBoundaries API metadata, Philippines ADM1: https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM1/
+- geoBoundaries project: https://www.geoboundaries.org/
