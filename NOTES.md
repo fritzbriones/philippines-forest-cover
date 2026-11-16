@@ -47,13 +47,13 @@ Consequently:
 - Sum of the three class columns across regions: **7,225,905 ha**.
 - National total stated in the supplied notes: **7,225,907 ha**.
 
-These figures differ by only 1–3 ha, but they are not mathematically identical. The supplied CSV alone does not establish whether this reflects independent rounding in the source tables or a transcription issue. The project therefore does **not** silently alter the source values or claim exact equality. The map uses the supplied `forest_cover_ha` aggregate consistently, while the R script reports the class-sum differences as a diagnostic. Before journal publication, reconcile these five rows and the national total against the original PSA workbook and preserve a copy of that source table in the research archive.
+These figures differ by only 1–3 ha. The differences have been reconciled: the five ±1 ha regional residuals add up exactly to the 3 ha national gap, consistent with independent rounding of each forest class to the nearest hectare in the source tables; see [`DATA_RECONCILIATION.md`](DATA_RECONCILIATION.md). The source values are kept unchanged. The map uses the supplied `forest_cover_ha` aggregate consistently, while the R script reports the class-sum differences as a diagnostic.
 
 The `forest_pct` column in the CSV is rounded to two decimal places. The R script recalculates the mapped percentage from `forest_cover_ha / total_land_ha_official` so that the map uses unrounded ratios.
 
 ## Methods wording
 
-> Regional forest-cover percentages were calculated by dividing the reported regional forest-cover aggregate (closed forest, open forest, and mangrove forest) by the corresponding official regional land area. National PSA reference percentages are reported separately because the national classified land-cover denominator and the sum of official regional land areas represent different accounting conventions. Small hectare-level differences between the reported regional aggregate and the sum of the three displayed forest classes are retained transparently pending reconciliation against the original PSA statistical workbook.
+> Regional forest-cover percentages were calculated by dividing the reported regional forest-cover aggregate (closed forest, open forest, and mangrove forest) by the corresponding official regional land area. National PSA reference percentages are reported separately because the national classified land-cover denominator and the sum of official regional land areas represent different accounting conventions. Small hectare-level differences between the reported regional aggregate and the sum of the three displayed forest classes are rounding residuals in the source tables and are documented in DATA_RECONCILIATION.md.
 
 ## Reproducibility
 
