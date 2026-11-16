@@ -157,6 +157,8 @@ The scripts include checks for:
 - Geographic geometry validity.
 - Complete polygon-to-data joins.
 
+**Open check:** the BARMM land-area denominator (36,650.95 km²) should be confirmed against the PSA source; see [`DATA_RECONCILIATION.md`](DATA_RECONCILIATION.md).
+
 ### Hectare-level discrepancies
 
 The supplied CSV contains small differences between the sum of the closed-forest, open-forest, and mangrove columns and the reported regional forest-cover aggregate in five regions. Across the 17 regions:
