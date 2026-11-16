@@ -19,16 +19,52 @@ Aggregate comparisons:
 
 The source workbook was not included in the uploaded project files, so it is not possible to determine which total is authoritative from the CSV alone. No values have been silently changed. The discrepancy is explicitly documented and surfaced by the R script. Reconcile against the original PSA workbook before publication.
 
-## To verify: BARMM land-area denominator
+## Rounding residuals - resolved
 
-The CSV uses 3,665,095 ha (36,650.95 km²) as BARMM's official land area, giving 8.11% forest cover.
-Published figures for BARMM's area disagree: 36,650.95 km² appears in PhilAtlas (PSA-derived, 2013),
-while other descriptions of the region give roughly 12,700 km². With about 1,271,100 ha as the
-denominator, BARMM's forest cover would be about 23.4% instead of 8.1%, which would change its colour
-on the map and its rank among regions.
+The five ±1 ha differences are consistent with independent rounding of each
+forest class to the nearest hectare in the source tables. Totals from the CSV:
 
-BARMM is also the main reason the regional land areas sum to 34.77 million ha, well above the
-national land-cover total of about 29.6–30 million ha.
+| Measure | Hectares |
+|---|---:|
+| Closed forest (sum of 17 regions) | 2,221,014 |
+| Open forest (sum of 17 regions) | 4,693,674 |
+| Mangrove (sum of 17 regions) | 311,217 |
+| Sum of the three classes | 7,225,905 |
+| Sum of reported regional forest cover | 7,225,908 |
+| National total in the supplied technical notes | 7,225,907 |
 
-Before publication, confirm which BARMM land area the PSA Land Asset Accounts use as the denominator
-for 2020 and whether the 36,650.95 km² figure includes non-land area. No values have been changed.
+The 3 ha gap between 7,225,908 and 7,225,905 is exactly the sum of the five
+regional residuals (+1 +1 +1 +1 -1). The supplied values are kept unchanged.
+Use 7,225,907 ha when quoting the national summary figure and 7,225,908 ha
+for the bottom-up sum of the 17 regional rows.
+
+## BARMM land-area denominator - official figure, with a caveat
+
+The CSV uses **3,665,095 ha (36,650.95 km²)** for BARMM. This is the
+published PSA figure based on the 2013 DENR-Land Management Bureau master
+list of land areas, so it is consistent with how the other regional
+denominators were sourced, and it is kept.
+
+Caveat for readers: this total includes Lanao del Sur at 15,055.51 km², and
+sources disagree strongly about that province's area (other published values
+include about 3,873 km², 4,121 km² and about 13,400-13,800 km²). The regional
+denominators also sum to 34,768,149 ha, about 4.8 million ha more than the
+national land area of about 30 million ha (31.1 million ha even without
+BARMM). If BARMM's land area were about 12,700 km², its forest cover would be
+about 23% rather than 8.1%.
+
+Boundary note: the map uses 2020 boundaries (Sulu inside BARMM), matching
+the 2020 forest data. The Supreme Court ruled in 2024 that Sulu is not part of
+BARMM, so tables for later years may use different BARMM boundaries.
+
+## Suggested publication footnote
+
+> Note: Regional land-area denominators are from the Philippine Statistics
+> Authority, based on the 2013 DENR-Land Management Bureau master list
+> (BARMM: 36,650.95 km², 2020 boundaries including Sulu); published area
+> figures for some BARMM provinces differ between sources. Forest classes
+> (closed, open, mangrove) are rounded independently to the nearest hectare
+> in the source data, so they differ from regional totals by ±1 ha in five
+> regions (IV-A, V, VIII, IX, XII). The sum of regional totals (7,225,908 ha)
+> and of forest classes (7,225,905 ha) therefore differ slightly from the
+> national total (7,225,907 ha).
