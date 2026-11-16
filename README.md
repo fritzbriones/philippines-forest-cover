@@ -157,7 +157,7 @@ The scripts include checks for:
 - Geographic geometry validity.
 - Complete polygon-to-data joins.
 
-**Open check:** the BARMM land-area denominator (36,650.95 km²) should be confirmed against the PSA source; see [`DATA_RECONCILIATION.md`](DATA_RECONCILIATION.md).
+**Denominator note:** BARMM uses the official PSA figure (36,650.95 km², 2013 DENR-LMB master list); some BARMM provincial areas differ between sources. The ±1 ha class differences are rounding. Details and a ready-to-use footnote: [`DATA_RECONCILIATION.md`](DATA_RECONCILIATION.md).
 
 ### Hectare-level discrepancies
 
