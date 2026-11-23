@@ -24,7 +24,7 @@ The boundary-data licence is separate from the MIT licence covering this project
 
 | Measure | Denominator / definition | Reference |
 |---|---|---|
-| National convention | 30,000,000 ha; forest cover includes mangrove | 24.09% |
+| National, incl. mangrove (calculated) | 29,588,367 ha PSA land-cover total; forest incl. mangrove 7,225,907 ha | 24.4% |
 | PSA published reference | 29,588,367 ha classified land-cover total; open + closed forest | 23.4% (reported; approximately 23.37% using the underlying ratio) |
 | Regional map | Official regional land-area denominators; forest cover includes mangrove | Calculated separately for each region |
 

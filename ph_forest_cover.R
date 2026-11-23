@@ -12,6 +12,7 @@
 library(tidyverse)
 library(sf)
 library(scales)
+library(stringr)
 
 # === 1. LOAD AND VALIDATE THE FOREST-COVER DATA ================================
 
@@ -100,8 +101,10 @@ forest |>
   print()
 
 # National reference values, retained as separately defined PSA conventions.
-national_forest_pct_30M <- 24.09
-national_forest_pct_PSA <- 23.4
+# Both use PSA's national land-cover total (29,588,367 ha) as denominator.
+psa_land_cover_ha       <- 29588367
+national_forest_pct_PSA <- 23.4      # PSA headline: open + closed forest
+national_forest_pct_all <- round(100 * 7225907 / psa_land_cover_ha, 1)  # incl. mangrove = 24.4
 
 # === 2. LOAD AND VALIDATE THE PREPARED REGIONAL BOUNDARIES =====================
 
@@ -153,23 +156,25 @@ final_map <- ggplot(map_data, aes(fill = forest_pct_calculated)) +
   coord_sf(datum = NA) +
   annotate(
     "label",
-    x = 118.8, y = 5.8,
+    x = 115.9, y = 14.4,
     label = paste0(
-      "National PSA reference:\n",
-      national_forest_pct_30M,
-      "% (incl. mangrove; 30.0M ha convention)\n",
-      national_forest_pct_PSA,
-      "% (PSA: open + closed forest,\n29,588,367 ha classified total)"
+      "National reference (PSA land-cover\nbase, 29,588,367 ha):\n",
+      national_forest_pct_PSA, "% open + closed forest\n",
+      "(PSA headline)\n",
+      national_forest_pct_all, "% incl. mangrove"
     ),
-    size = 2.6, hjust = 0, lineheight = 0.9,
-    fill = "white", color = "grey30", alpha = 0.9
+    size = 3, hjust = 0, lineheight = 0.95,
+    fill = "white", color = "grey25", alpha = 0.95
   ) +
   theme_minimal(base_size = 11) +
   theme(
     legend.position = "right",
     plot.title = element_text(face = "bold", size = 14),
     plot.subtitle = element_text(color = "grey30", size = 10),
-    plot.caption = element_text(size = 7, hjust = 0, lineheight = 1.1),
+    plot.caption = element_text(size = 7.5, hjust = 0, lineheight = 1.1),
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+    axis.title = element_blank(),
     plot.margin = margin(15, 15, 15, 15)
   ) +
   labs(
@@ -178,20 +183,15 @@ final_map <- ggplot(map_data, aes(fill = forest_pct_calculated)) +
       "Closing stock of closed, open, and mangrove forest",
       "as a share of official regional land area"
     ),
-    caption = paste0(
-      "Forest data: PSA Land Asset Accounts 2015-2020 (2020 closing stock); ",
-      "regional land areas: official PSA/DENR figures.\n",
-      "Regional percentages use official regional land areas as denominators. ",
-      "The sum of regional land areas (~34.77M ha) exceeds the national ",
-      "classified land-cover total (29,588,367 ha) because the measures use ",
-      "different administrative and land-accounting conventions.\n",
-      "The national values are PSA reference figures, not weighted averages ",
-      "of the regional percentages. Regional forest cover includes mangrove; ",
-      "the published 23.4% PSA reference refers to open and closed forest.\n",
-      "Boundaries: geoBoundaries, gbOpen, Philippines ADM1, 2020 vintage; ",
-      "source agencies: NAMRIA, PSA and OCHA Philippines; ",
-      "boundary data licence: CC BY 3.0 IGO."
-    )
+    caption = str_wrap(paste(
+      "Forest data: PSA Land Asset Accounts 2015-2020 / CPES Table 1.22 (2020).",
+      "Denominators: official regional land areas (PSA, 2013 DENR-LMB master list).",
+      "Caution: these regional land areas sum to 34.77M ha, about 17% more than PSA's",
+      "national land-cover total of 29,588,367 ha, so regional percentages are",
+      "conservative and are not directly comparable with the national figure.",
+      "Boundaries: geoBoundaries gbOpen PHL ADM1, 2020 vintage",
+      "(NAMRIA, PSA, OCHA Philippines), CC BY 3.0 IGO."
+    ), width = 150)
   )
 
 print(final_map)
@@ -210,3 +210,57 @@ ggsave(
 )
 
 cat("SUCCESS: map exported to output/ph_forest_cover_2020.png and .svg\n")
+
+# === 5. COMPANION CHART: ranked regions (denominator-free share included) =====
+# Share of national forest does not depend on the land-area denominators, so it
+# is robust to the 34.77M vs 29.59M ha mismatch described in the caption.
+
+ranked <- forest |>
+  mutate(
+    share_of_national_forest = 100 * forest_cover_ha / sum(forest_cover_ha),
+    label = paste0(
+      sprintf("%.1f%%", forest_pct_calculated), " of land  |  ",
+      comma(forest_cover_ha), " ha (",
+      ifelse(share_of_national_forest < 0.1, "<0.1%",
+             sprintf("%.1f%%", share_of_national_forest)), " of PH forest)"
+    ),
+    short_name = str_replace(region_name, "^Region [IVXAB-]+ \\((.*)\\)$", "\\1") |>
+      str_replace("Cordillera Administrative Region", "Cordillera"),
+    region_name = fct_reorder(region_name, forest_pct_calculated)
+  )
+
+write_csv(
+  ranked |>
+    arrange(desc(forest_pct_calculated)) |>
+    transmute(region, region_name, forest_cover_ha, total_land_ha_official,
+              forest_pct = round(forest_pct_calculated, 2),
+              share_of_national_forest_pct = round(share_of_national_forest, 2)),
+  "output/ph_forest_cover_2020_ranked.csv"
+)
+
+top3 <- ranked |> slice_max(forest_cover_ha, n = 3)
+ranked_plot <- ggplot(ranked, aes(x = forest_pct_calculated, y = region_name,
+                                   fill = forest_pct_calculated)) +
+  geom_col(width = 0.75) +
+  geom_text(aes(label = label), hjust = -0.03, size = 2.9, color = "grey20") +
+  scale_fill_viridis_c(option = "viridis", guide = "none") +
+  scale_x_continuous(labels = label_number(suffix = "%"),
+                     expand = expansion(mult = c(0, 1.05))) +
+  labs(
+    title = paste0("Cordillera (", sprintf("%.0f", max(ranked$forest_pct_calculated)),
+                   "%) is the most forested region; Central Visayas and NCR the least"),
+    subtitle = paste0(paste(top3$short_name, collapse = ", "),
+                      " hold ", sprintf("%.0f", sum(top3$share_of_national_forest)),
+                      "% of all Philippine forest (2020)"),
+    x = "Forest cover (% of official regional land area)", y = NULL,
+    caption = "Source: PSA (2020 closing stock). Percentages use official regional land areas; see map caption."
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(plot.title = element_text(face = "bold", size = 12),
+        plot.title.position = "plot",
+        panel.grid.major.y = element_blank(),
+        plot.caption = element_text(size = 7.5, hjust = 0))
+
+ggsave("output/ph_forest_cover_2020_ranked.png", ranked_plot,
+       width = 10, height = 6.5, dpi = 200, bg = "white")
+cat("SUCCESS: ranked chart exported to output/ph_forest_cover_2020_ranked.png\n")
